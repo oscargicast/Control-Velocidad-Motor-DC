@@ -1,0 +1,453 @@
+\documentclass[twocolumn]{IEEEtran}
+
+\usepackage[ansinew]{inputenc} 
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{hyperref}
+\usepackage{longtable}               
+\usepackage{fancyhdr}
+\usepackage{times}
+\usepackage{color}                   
+\usepackage{makeidx}                 
+\usepackage{cite}
+\usepackage{float}
+\setcounter{page}{1}
+
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=Matlab,                 % the language of the code
+  morekeywords={*,...},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{white},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+
+\begin{document}
+\include{./imagenes}
+
+\title{Control de Velocidad de un Motor DC}
+
+
+\author{Autores \\ 
+				Estrada Vidal, Jorge  \textcolor{blue}{jor1550g@gmail.com} \\
+				Florian Chacon, Erick  \textcolor{blue}{erick.florian.uni@gmail.com} \\
+				Giraldo Castillo, Oscar \textcolor{blue}{oscar.gi.cast@gmail.com} \\ 		
+				\vspace{4 mm}
+				Asesores: \\
+				Ing. Rodriguez Bustinza, Ricardo \textcolor{blue}{robust@uni.edu.pe} \\ 	
+				
+				\vspace{8 mm}
+				\emph{Universidad Nacional de Ingenier\'ia}
+		}			
+
+		
+		
+%\markboth{IEEE Trans...}{Murray and Balemi: ...}
+\maketitle
+
+
+
+
+
+\section{OBJETIVOS} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{itemize} 
+\item Identificar el modelo de un planta RC través de la adquisición de datos y de la estructura paramétrica ARX. 
+\item Diseñar un controlador PI para la planta RC.
+\item Analizar y comparar un controlador PI y PID para la planta RC.
+\end{itemize}
+
+\section{TAREA ACADEMICA}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Realizar el diseño analitico del diseño control PI Analogico y PI por rediseño digital del código proporcionado por el profesor (control\_rc.m). La tarea además de la parte analitica debe acompañar el criterio de diseño de los polos deseados en forma gráfica (Matlab). 
+ 
+
+\section{PRESENTACIÓN DE RESULTADOS} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+En este capítulo mostraremos los resultados del análisis anterior. LLegando a obtener:
+\begin{itemize}
+\item Diseño analógico de un controlador PI.
+\item Rediseño digital de un controlador PI por Tustin.
+\item Comparación entre control PI y PID.
+\end{itemize}
+
+\subsection{Análisis}
+
+Para hallar el controlador de nuestra planta RC, procederemos primero a identificar mediante un ARX[111], con esto obtendremos la planta identificada la cual seria como se muestra en la ecuación \ref{eq:5}.
+
+\begin{equation}
+P\big(s\big) =  \frac{Gain}{s+\frac{1}{\tau}} = \frac{8.66}{s+8.59} \label{eq:5}
+\end{equation}
+
+Observamos que nuestra planta presenta un polo real
+
+\begin{equation}
+s_{p}=-8.59
+\end{equation}
+
+El sistema que vamos a analizar es el mostrado en la Fig \ref{fig:sistemPID}
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/sistema.png}
+ 	\caption{Lugar de las raices}
+ 	\label{fig:sistemPID}
+\end{figure}
+
+
+
+Sabemos que la Función de Transferencia de nuestro controlador PI es de la siguiente forma
+
+\begin{equation}
+G_{c}(s) = \frac{K(s+a)}{s}
+\end{equation}
+
+Asumiendo las siguientes variables de diseño:
+
+\begin{eqnarray}
+t_{s} = 1; \\
+M_{p} = 0.1;
+\end{eqnarray}
+
+Con esto procederemos a hallar nuestros polos deseados ($s_{d}$) de la siguiente manera:
+
+\begin{eqnarray}
+\zeta = - \frac{\log(M_{p})}{\sqrt{\log(M_{p}^2 + \pi^2)}} = 0.5912 \\
+w_{n} = \frac{4.6}{\zeta t_{s}} = 7.7814 
+%s1=-zetawn+1jwnsqrt(1-zeta^2);
+\end{eqnarray}
+
+%\begin{eqnarray}
+%\nonumber s_{d} & = & - \zeta  w_{n} & \pm jw_{n}\sqrt{1-\zeta ^2} \\
+%& = & -4.6  & \pm j6.2761
+%\end{eqnarray}
+
+\begin{equation}
+\begin{array}{ccccc}
+s_{d} & = & - \zeta  w_{n} & \pm & jw_{n}\sqrt{1-\zeta ^2} \\
+& = & -4.6  & \pm & j6.2761
+\end{array}
+\end{equation}
+
+Graficando el lugar de las raices (Ver Fig \ref{fig:rootLocus} ), en ella se observa el polo deseado, asi como el polo de la planta y el cero del controlador PI cuyos parametros estan hallados aplicando el criterio de fase para el caso del cero y el criterio de la magnitud para la ganancia.
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/rootLocus.png}
+ 	\caption{Lugar de las raices}
+ 	\label{fig:rootLocus}
+\end{figure}
+
+Note que $r_{3}$ corresponde al cero del integrador que más adelante será calculado. 
+Hallando los angulos $\theta _{1}$ y $ \theta _{2}$ con los cuales podrémos calcular $\theta _{3}$:
+
+\begin{eqnarray}
+ \theta_{1}= \pi  -atan \big( \frac{Id}{rd} \big) =  2.2033 rad \\
+ \theta_{2}= atan \big( \frac{Id-Ip}{rp-rd} \big) =  1.0046 rad \\
+ \theta_{3}= \theta_{1}+ \theta_{2}+  \pi = 0.0663 rad
+\end{eqnarray}
+
+Usaremos el caso 2 para el cálculo del cero del controlador ($a$) debido a que el valor de $\theta_{3}<\frac{\Pi}{2}$
+
+\begin{equation}
+a =  r_{d} + \frac{i_{d}}{\tan(\theta _{3})}
+%rd+id/tan(theta3)
+\end{equation}
+
+Segun los parametros de la Fig \ref{fig:rootLocus} podemos hallar las siguientes magnitudes:
+
+\begin{equation}
+\begin{array}{ccc}
+r_{1} & = & s_{d} - s{c} \\
+& = &  -4.6000 + j6.2761 
+\end{array}
+\end{equation}
+
+\begin{equation}
+\begin{array}{ccc}
+r_{2} & = & s_{d} - s{p} \\
+& = & 3.9895 + j6.2761 
+\end{array}
+\end{equation}
+
+\begin{equation}
+\begin{array}{ccc}
+r_{3} & = & s_{d} - z{c} \\
+& = &  -103.79 + j6.2761 
+\end{array}
+\end{equation}
+
+Para el cálculo de la ganancia K, hacemos uso de la ganancia unitaria en el lugar de las raíces:
+
+\begin{equation}
+K = \frac{\left| r1 \right|  \left| r2 \right|}{Gain  \left| r3 \right|} =  0.0642
+%K = abs(r1)abs(r2)/(gainabs(r3));
+\end{equation}
+
+Finalmente nuestro controlador PI queda de la siguiente forma:
+ 
+\begin{equation}
+G_{c}(s) = \frac{0.06422s+6.37}{s}
+%  0.06422 s + 6.37
+%  ----------------
+%         s
+\end{equation}
+
+Usando re-diseño por el metodo de Tustin para hallar el controlador en tiempo discreto, obtenemos:
+
+\begin{equation}
+G_{c}(z) = \frac{0.1377 z + 0.009287}{z - 1}
+%  0.1377 z + 0.009287
+%  -------------------
+%         z - 1
+\end{equation}
+
+ 
+\subsection{Resultados obtenidos}
+
+La data obtenida de la adquisición se puede apreciar en la figura ~\ref{fig:data}
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/data.png}
+ 	\caption{Data obtenida de la adquisición}
+ 	\label{fig:data}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/identificacion_arx.png}
+ 	\caption{Identificación ARX}
+ 	\label{fig:identificacion_arx}
+\end{figure}
+
+ 
+Se identifica el sistema usando la estructura paramétrica ARX (ver Fig. ~\ref{fig:identificacion_arx}) usando una frecuencia de muestreo $f_{s}$ de $=30Hz$. Posteriormente, hallamos los controladores PI y exportamos los coeficientes obtenidos del controlador digital al directorio \textit{/data} para su procesamiento en labview. El código generado es el siguiente:
+
+
+\begin{lstlisting}
+clear all; close all; clc
+%% Programa para calcular el controlador
+% -----------------
+%% Cargando la DATA
+% -----------------
+dataLeida = load('../data/data_rc.lvm');
+T=1/30; % Tiempo de Muestreo 
+y1=dataLeida(:,4);
+u1=dataLeida(:,6);
+
+figure
+subplot(211)
+plot(y1,'b','LineWidth',2); 
+xlabel('\bf t(seg)'); ylabel('\bf y(volts)');
+subplot(212)
+plot(u1,'r','LineWidth',2); 
+xlabel('\bf t(seg)'); ylabel('\bf u(volts)');
+
+% -------------------
+%% Identificación ARX
+% -------------------
+data=iddata(y1,u1,T);
+th=arx(data,[1 1 1]);
+present(th)
+thc=d2c(th);
+[num,den]=tfdata(thc);
+Gp=tf(num,den)
+gain = num{1}(2);
+tau = 1/num{1}(2);
+
+% -------------------
+%% Polos de la planta 
+% -------------------
+sp=pole(Gp);
+ip=abs(imag(sp));
+rp=abs(real(sp));
+
+% ------------------------------------------
+%% Especificaciones de diseño polos deseados
+% ------------------------------------------
+ts=1;
+Mp=0.1;
+zeta=-log(Mp)/sqrt((log(Mp))^2+pi^2);
+wn=4.6/(zeta*ts);
+s1=-zeta*wn+1j*wn*sqrt(1-zeta^2);
+% Polo deseado
+sd=s1;
+id=abs(imag(sd));
+rd=abs(real(sd));
+
+% -------------------------------
+%% Diseño del control PI continuo
+% -------------------------------
+theta1=pi-atan(id/rd); 
+theta2=atan((id-ip)/(rp-rd)); 
+theta3=theta1+theta2+pi;   % condición de fase
+theta3 = pi_to_pi(theta3); 
+
+if abs(theta3)<pi/2
+    zc = rd+id/tan(theta3);
+else
+    zc = rd-id/tan(theta3);
+end
+a = zc; % zero del controlador
+% polo del controlador
+sc = 0;
+
+r1 = sd-sc; %polo
+r2 = sd-sp; %polo
+r3 = sd-zc; %zero
+
+K = abs(r1)*abs(r2)/(gain*abs(r3));
+
+% ---------------------------------------
+%% Simulación del Controlador PI continuo
+% ---------------------------------------
+Gc=tf(K*[1 a],[1 0])
+% Funcion de transferencia en lazo cerrado H 
+L=series(Gc,Gp);
+H=L/(L+1)
+
+figure; hold on;
+t = 0:0.001:5;
+
+u=ones(size(t));
+yp=lsim(H,u,t);
+
+plot(t,u,'r')
+plot(t,yp, 'b', 'LineWidth',2)
+
+xlabel('\bf t(seg)'); ylabel('\bf y(volts)');
+legend('set point', 'y_{lazo cerrado}');
+
+% ---------------------------------
+%% Re-diseño por tustin del Control 
+%% en Tiempo Discreto
+% ---------------------------------
+T=tau/5;
+[Nt,Dt] = tfdata(Gc,'v');
+Nt = poly2sym(Nt,'s');
+Dt = poly2sym(Dt,'s');
+syms z
+Gdt = Nt/Dt;
+Gdt = subs(Gdt,{'s'},(2*(z-1))/(T*(z+1)));
+Gdt = simplify(Gdt);
+Gdt = vpa(Gdt,4); 
+[NDt, DDt] = numden(Gdt);
+NDt = sym2poly(NDt);
+DDt = sym2poly(DDt);
+
+% --------------------------------
+%% FT del Controlador digital D(z)
+% --------------------------------
+GDt = tf(NDt,DDt,T)
+
+% -------------------------------------
+%% Coeficientes para lectura de LabVIEW
+% -------------------------------------
+[Np,Dp]=tfdata(Gp,'v');
+planta = [Np Dp]; 
+save '../data/coef_planta.lvm' planta -ascii -tabs
+save '../data/num_controller.lvm' NDt -ascii -tabs
+save '../data/den_controller.lvm' DDt -ascii -tabs
+\end{lstlisting}
+
+
+Finalmente podemos validar que las respuestas de los sistemas controlados por un controlador PI (ver Fig. ~\ref{fig:pi_sistema_controlado}) y PID (ver Fig. ~\ref{fig:pid_sistema_controlado}) en lazo cerrado cumplen con las condiciones de diseño propuestas.
+
+
+
+
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/pi_sistema_controlado.png}
+ 	\caption{Planta controlada usando un controlador PI}
+ 	\label{fig:pi_sistema_controlado}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/pid_sistema_controlado.png}
+ 	\caption{Planta controlada usando un controlador PID}
+ 	\label{fig:pid_sistema_controlado}
+\end{figure}
+
+
+\section{CONCLUSIONES} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{itemize}
+\item Notamos que comparando ambos controladores empleados (PI y PID), el sistema responde mejor frente al controlador PI ya que posee un menor sobre impulso ante el PID. (ver Fig. ~\ref{fig:compara_pi_pid})
+
+
+\end{itemize}
+
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/compara_pi_pid.png}
+ 	\caption{Comparación entre PI y PID}
+ 	\label{fig:compara_pi_pid}
+\end{figure}
+
+
+\bibliographystyle{IEEE} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\nocite{*}
+\bibliographystyle{IEEE}
+
+\begin{thebibliography}{1}
+
+\bibitem{}
+Repositorios 
+\newblock {\em https://github.com/oskargicast/ControladorPI}
+\newblock 
+
+\bibitem{}
+Ing. Rodriguez Bustinza, Ricardo
+\newblock {\em Diseño del controlador discreto usando aproximador digital.}
+\newblock 
+
+\bibitem{}
+Leonardo J. Marín, Víctor M. Alfaro
+\newblock {\em Sintonización de controladores por ubicación de polos y ceros}
+\newblock Departamento de Automática, Escuela de Ingeniería Eléctrica, Universidad de Costa Rica
+
+\end{thebibliography}
+
+
+
+
+\end{document}
