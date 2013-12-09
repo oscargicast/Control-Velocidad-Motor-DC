@@ -42,7 +42,7 @@
   showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
   showstringspaces=false,          % underline spaces within strings only
   showtabs=false,                  % show tabs within strings adding particular underscores
-  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
   stringstyle=\color{mymauve},     % string literal style
   tabsize=2,                       % sets default tabsize to 2 spaces
   title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
@@ -52,7 +52,7 @@
 \begin{document}
 \include{./imagenes}
 
-\title{Control de Velocidad de un Motor DC}
+\title{Diseño analítico de un controlador PID analógico y digital de velocidad para un motor DC}
 
 
 \author{Autores \\ 
@@ -74,74 +74,434 @@
 
 
 
-
-
 \section{OBJETIVOS} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{itemize} 
-\item Identificar el modelo de un planta RC través de la adquisición de datos y de la estructura paramétrica ARX. 
-\item Diseñar un controlador PI para la planta RC.
-\item Analizar y comparar un controlador PI y PID para la planta RC.
+\item Identificar el modelo de un planta motor DC. 
+\item Diseñar un controlador PID para dicha planta.
+\item Analizar y validar los resultados en tiempo real.
 \end{itemize}
 
-\section{TAREA ACADEMICA}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-Realizar el diseño analitico del diseño control PI Analogico y PI por rediseño digital del código proporcionado por el profesor (control\_rc.m). La tarea además de la parte analitica debe acompañar el criterio de diseño de los polos deseados en forma gráfica (Matlab). 
  
 
 \section{PRESENTACIÓN DE RESULTADOS} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-En este capítulo mostraremos los resultados del análisis anterior. LLegando a obtener:
+A continuación se expondrán los resultados obtenidos de acuerdo al desarrollo progresivo de la experiencia. Para un mayor entendimiento del proyecto puede revisar la figura ~\ref{fig:esquema} para un mejor entendimiento del sistema.
+
 \begin{itemize}
-\item Diseño analógico de un controlador PI.
-\item Rediseño digital de un controlador PI por Tustin.
-\item Comparación entre control PI y PID.
+\item Análisis del sistema en lazo abierto.
+	\begin{itemize}
+	\item Escalamiento de magnitudes.
+	\item Toma de datos para la identificación.
+	\end{itemize}
+\item Identificación del sistema.
+\item Diseño del controlador  PID.
+\item Validación y comparación con un modelo teórico en tiempo real.
 \end{itemize}
-
-\subsection{Análisis}
-
-Para hallar el controlador de nuestra planta RC, procederemos primero a identificar mediante un ARX[111], con esto obtendremos la planta identificada la cual seria como se muestra en la ecuación \ref{eq:5}.
-
-\begin{equation}
-P\big(s\big) =  \frac{Gain}{s+\frac{1}{\tau}} = \frac{8.66}{s+8.59} \label{eq:5}
-\end{equation}
-
-Observamos que nuestra planta presenta un polo real
-
-\begin{equation}
-s_{p}=-8.59
-\end{equation}
-
-El sistema que vamos a analizar es el mostrado en la Fig \ref{fig:sistemPID}
 
 \begin{figure}[h!]
 	\centering 
 	\graphicspath{./imagenes/}
- 	\includegraphics[width=0.45\textwidth]{./imagenes/sistema.png}
- 	\caption{Lugar de las raices}
- 	\label{fig:sistemPID}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/esquema.png}
+ 	\caption{Esquemático del sistema en lazo cerrado}
+ 	\label{fig:esquema}
 \end{figure}
 
 
 
-Sabemos que la Función de Transferencia de nuestro controlador PI es de la siguiente forma
+
+\subsection{Análisis del sistema en lazo abierto}
+
+\subsubsection{Escalamiento de magnitudes}
+La tabla ~\ref{table:escalamiento} nos muestra datos obtenidos del sistema en lazo abierto, para ello se realizo el esquema labview de la figura ~\ref{fig:labview_escalamiento}. 
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/labview_escalamiento.png}
+ 	\caption{Captura de datos para el escalamiento}
+ 	\label{fig:esquema}
+\end{figure}
+
+
+% Tabla****
+\begin{table}
+\bgroup
+\def\arraystretch{1.5}
+\begin{center}
+\begin{tabular}{ | c c c c c c | }
+\hline                 
+\textbf{$Vi$}	& \textbf{$Vo$}	& \textbf{$Enc$}	& \textbf{$Eje$} & \textbf{$Eje_{1}$} & \textbf{$Eje_{2}$}			\\ 	
+\hline
+0 & 0 & 0 & 0 & 0 & 0 \\
+0.8 & 0.163 & 230 & 2.3 & 138 & 127 \\
+1 & 0.326 & 500 & 5 & 300 & 294 \\
+1.5 & 0.784 & 1180  & 11.8  & 708 & 683 \\
+2 & 1.222 & 1860  & 18.6  & 1116  & 1098  \\
+2.5 & 1.669 & 2530  & 25.3  & 1518  & 1504  \\
+3 & 2.148 & 3220  & 32.2  & 1932  & 1919  \\
+3.5 & 2.565 & 3900  & 39  & 2340  & 2405  \\
+4 & 3.034 & 4550  & 45.5  & 2730  & 2746  \\
+4.5 & 3.492 & 5310  & 53.1  & 3186  & 3189  \\
+5 & 4.042 & 6090  & 60.9  & 3654  & 3698  \\
+\hline  
+\end{tabular}
+\end{center}
+\egroup
+\caption{
+$Vi(volts)$: voltaje de entrada al Arduino, 
+$Vo(volts)$: Voltaje de salida del conversor F/V, 
+$Enc(Hz)$: frecuencia del encoder, 
+$Eje(Hz)$: frecuencia del eje en Hz obtenido indirectamente, 
+$Eje_{1}(rpm)$: Frecuencia del eje en RPMs obtenido indirectamente, 
+$Eje_{2}(rpm)$: Frecuencia en RPMs obtenido directamente por un tacómetro 
+}
+\label{table:escalamiento}
+\end{table}
+
+De la data obtenida en la tabla ~\ref{table:escalamiento} extraemos las siguientes gráficas y procedemos a linealizarlas.
+
+\begin{itemize}
+
+
+\item $Vo(volts)$ vs. $Eje_{1}(rpm)$ (Ver Fig. ~\ref{fig:excel_vo_rpm}).
+La recta aproximada mediante minimos cuadrados queda descrita por la ecuación ~\ref{eq:ecalamiento_vo_rpm}
+\begin{equation}
+\begin{split}
+RPM =  906.48Vo - 0.41 \\
+R^{2} = 0.9999
+\end{split}
+\label{eq:ecalamiento_vo_rpm}
+\end{equation}
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/excel_vo_rpm.png}
+ 	\caption{$Vo(volts)$ vs. $Eje_{1}(rpm)$}
+ 	\label{fig:excel_vo_rpm}
+\end{figure}
+
+
+\item $Eje_{1}(rpm)$ vs. $Vo(volts)$ (Ver Fig. ~\ref{fig:excel_rpm_vo}).
+La recta aproximada mediante minimos cuadrados queda descrita por la ecuación ~\ref{eq:ecalamiento_rpm_vo}
+\begin{equation}
+\begin{split}
+Vo =  0.0011RPM + 0.0006 \\
+R^{2} = 0.9999
+\end{split}
+\label{eq:ecalamiento_rpm_vo}
+\end{equation}
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/excel_rpm_vo.png}
+ 	\caption{$Eje_{1}(rpm)$ vs. $Vo(volts)$}
+ 	\label{fig:excel_rpm_vo}
+\end{figure}
+
+
+\item $Enc(Hz)$ vs. $Vo(volts)$ (Ver Fig. ~\ref{fig:excel_f_vo})
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/excel_f_vo.png}
+ 	\caption{$Enc(Hz)$ vs. $Vo(volts)$}
+ 	\label{fig:excel_f_vo}
+\end{figure}
+
+
+\item $Vi(volts)$ vs. $Eje_{1}(rpm)$ (Ver Fig. ~\ref{fig:excel_vi_rpm})
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/excel_vi_rpm.png}
+ 	\caption{$Vi(volts)$ vs. $Eje_{1}(rpm)$}
+ 	\label{fig:excel_vi_rpm}
+\end{figure}
+
+
+\item $Vi(volts)$ vs. $Vo(volts)$ (Ver Fig. ~\ref{fig:excel_vi_vo})
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/excel_vi_vo.png}
+ 	\caption{$Vi(volts)$ vs. $Vo(volts)$}
+ 	\label{fig:excel_vi_vo}
+\end{figure}
+
+\end{itemize}
+
+
+
+
+
+
+\subsubsection{Toma de datos para la identificación}
+
+
+Mediante un generador de señal pre-contruido en labview (Ver Fig. ~\ref{fig:labview_toma_datos}), introduciremos a nuestro sistema diversas señales de modo que capturaremos entradas y salidas para posteriormente identificarlas.
+
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/labview_toma_datos.png}
+ 	\caption{Toma de datos en labview}
+ 	\label{fig:labview_toma_datos}
+\end{figure}
+
+
+La data obtenida es la siguiente:
+\begin{itemize}
+\item Para una señal de entrada Gate: 
+	\begin{itemize}
+	\item Entrada - Salida (Ver Fig. ~\ref{fig:arx_gate_io})
+	\item Comparación de estructuras ARX (Ver Fig. ~\ref{fig:arx_gate_compara})
+	\end{itemize}
+	
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/arx_gate_io.png}
+ 	\caption{Respuesta del sistema ante una entrada tipo gate}
+ 	\label{fig:arx_gate_io}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/arx_gate_compara.png}
+ 	\caption{Comparación de estructuras parametricas ARX}
+ 	\label{fig:arx_gate_compara}
+\end{figure}
+
+
+
+\item Para una señal de entrada Step: 
+	\begin{itemize}
+	\item Entrada - Salida (Ver Fig. ~\ref{fig:arx_step_io})
+	\item Comparación de estructuras ARX (Ver Fig. ~\ref{fig:arx_step_compara})
+	\end{itemize}
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/arx_step_io.png}
+ 	\caption{Respuesta del sistema ante una entrada tipo step}
+ 	\label{fig:arx_step_io}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/arx_step_compara.png}
+ 	\caption{Comparación de estructuras parametricas ARX}
+ 	\label{fig:arx_step_compara}
+\end{figure}
+
+	
+	
+\item Para una señal de entrada Rampa: 
+	\begin{itemize}
+	\item Entrada - Salida (Ver Fig. ~\ref{fig:arx_rampa_io})
+	\item Comparación de estructuras ARX (Ver Fig. ~\ref{fig:arx_rampa_compara})
+	\end{itemize}
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/arx_rampa_io.png}
+ 	\caption{Respuesta del sistema ante una entrada tipo rampa}
+ 	\label{fig:arx_rampa_io}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/arx_rampa_compara.png}
+ 	\caption{Comparación de estructuras parametricas ARX}
+ 	\label{fig:arx_rampa_compara}
+\end{figure}
+	
+	
+	
+\item Para una señal de entrada Seno: 
+	\begin{itemize}
+	\item Entrada - Salida (Ver Fig. ~\ref{fig:arx_seno_io})
+	\item Comparación de estructuras ARX (Ver Fig. ~\ref{fig:arx_seno_compara})
+	\end{itemize}
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/arx_seno_io.png}
+ 	\caption{Respuesta del sistema ante una entrada tipo seno}
+ 	\label{fig:arx_seno_io}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/arx_seno_compara.png}
+ 	\caption{Comparación de estructuras parametricas ARX}
+ 	\label{fig:arx_seno_compara}
+\end{figure}	
+	
+\end{itemize}
+
+
+
+
+
+
+\subsection{Identificación del sistema.}
+
+Debido a que solo controlaremos la velocidad de nuestro motor y considerando la inductancia de este muy cercana a cero ($L\approx0$), el sistema puede ser aproximado a uno de primer orden. Por lo tanto, procederemos a identificar nuestro sistema mediante la estructura paramétrica $ARX[111]$ para una $f_{s}=30Hz$, eligiengo el modelo generado por la señal de entrada tipo gate, con ello obtendremos la planta identificada la cual sería como se muestra en la ecuación \ref{eq:sistema_identificado}.
 
 \begin{equation}
-G_{c}(s) = \frac{K(s+a)}{s}
+G\big(s\big) =  \frac{Gain}{s+\frac{1}{\tau}} = \frac{10.61}{s+12.85} \label{eq:sistema_identificado}
+\end{equation}
+
+Discretizando la planta con un retenedor de orden cero (ZOH). Obntenemos la funcion de transferencia en z(Ver ecuación\ref{eq:sistema_z}). Obteniendo una la ley de control de nuestra planta por euler-backwards de la forma de la ecuación \ref{eq:sistema_backwards}
+\begin{equation}
+D\big(z\big) = \frac{0.2641}{z-0.6801} \label{eq:sistema_z}
+\end{equation}
+
+
+\begin{equation}
+y(k) =  0.6801y(k-1) + 0.2641u(k-1) \label{eq:sistema_backwards}
+\end{equation}
+
+El código \ref{code:identificacion} escrito en matlab realiza el proceso de identificación.
+\begin{lstlisting}
+
+\label{code:identificacion}
+clear all; close all; clc;
+line_widht = 2;
+
+%% Input
+data_type = input('signal(gate/step/rampa/seno): ', 's');
+validatestring(data_type, {'gate', 'step', 'rampa', 'seno'})
+file = strcat('../data/motor_', data_type, '.lvm');
+data = load(file);
+
+%% DATA experimental proviene desde la planta
+u = data(:, 2);
+y = data(:, 4);
+t_real = data(:, 1);
+
+N = length(u);
+disp('# de muestras'), disp(N);
+
+tini = 0;
+tfin = t_real(end);
+t = linspace(tini, tfin, N);
+
+% teorica
+figure; hold on;
+plot(y, 'r', 'LineWidth', line_widht);
+plot(u, 'b', 'LineWidth', line_widht);
+
+ylabel('Amplitude(volts)'), xlabel('N(samples)')
+legend('y_{exp}', 'u_{exp}')
+
+figure; hold on;
+plot(t, y, 'r', 'LineWidth', line_widht);
+
+%% Toolbox de identificacion
+
+%% 1st. Porceso de la data-objeto - iddata DAT = iddata(Y,U,Ts)
+Ts = 0.03; 
+idata = iddata(y, u, Ts);
+
+%% 2nd Estructura parametrica ARX(na, nb, nc, nx)
+nn = [
+    2 1 1; 
+    1 2 2; 
+    2 2 1;
+    1 1 1;
+];
+colors = ['k', 'g', 'b', 'm'];
+size_n=size(nn);
+for i=1:size_n(1)
+fprintf('\n\n\t\t\t\t\t ARX(%d, %d, %d)', nn(i,1), nn(i,2), nn(i,3)); 
+fprintf('\n==========================================================='); 
+    
+th = arx(idata, [nn(i,1), nn(i,2), nn(i,3)]);
+% B numerador, A denominador
+% FPE(funcion de prediccion de error)
+% th
+
+%% 3rd discreta - funcion de transerencia D(z)
+D = tf(th.b, th.a, Ts);
+D
+% De = tf(th.c, th.a, Ts);
+% cmd: d2c
+th
+
+%% 4th Funcion de transferencia G(s)
+% Gs = d2c(D, 'zoh');
+% Ge = d2c(De, 'zoh');
+% disp('funcion de trans'), Gs;
+
+[n, d] = tfdata(D, 'v'); 
+Gs = d2c(D, 'zoh');
+Gs
+
+yc = lsim(Gs, u, t);
+
+% armax
+plot(t, yc, strcat(colors(i), '--') , 'LineWidth', line_widht);
+% legend(colors(i))
+end
+
+ylabel('Amplitude(volts)'), xlabel('t(sec.)');
+legend( ...
+'y_{exp}', ...
+arrayfun(@num2str, nn(1,:), 'UniformOutput', true), ...
+arrayfun(@num2str, nn(2,:), 'UniformOutput', true), ...
+arrayfun(@num2str, nn(3,:), 'UniformOutput', true), ...
+arrayfun(@num2str, nn(4,:), 'UniformOutput', true));
+\end{lstlisting}
+
+
+
+
+
+
+
+\subsection{Diseño de un controlador PID}
+
+Observamos que nuestra planta presenta un polo real
+
+\begin{equation}
+s_{p}=-12.85
+\end{equation}
+
+
+Sabemos que la Función de Transferencia de nuestro controlador PID es de la siguiente forma
+
+\begin{equation}
+G_{c}(s) = \frac{K(s+a)(s+b)}{s}
 \end{equation}
 
 Asumiendo las siguientes variables de diseño:
 
 \begin{eqnarray}
 t_{s} = 1; \\
-M_{p} = 0.1;
+M_{p} = 0.08;
 \end{eqnarray}
 
 Con esto procederemos a hallar nuestros polos deseados ($s_{d}$) de la siguiente manera:
 
 \begin{eqnarray}
-\zeta = - \frac{\log(M_{p})}{\sqrt{\log(M_{p}^2 + \pi^2)}} = 0.5912 \\
-w_{n} = \frac{4.6}{\zeta t_{s}} = 7.7814 
+\zeta = - \frac{\log(M_{p})}{\sqrt{\log(M_{p}^2 + \pi^2)}} = 0.6266 \\
+w_{n} = \frac{4.6}{\zeta t_{s}} = 7.3415
 %s1=-zetawn+1jwnsqrt(1-zeta^2);
 \end{eqnarray}
 
@@ -153,206 +513,152 @@ w_{n} = \frac{4.6}{\zeta t_{s}} = 7.7814
 \begin{equation}
 \begin{array}{ccccc}
 s_{d} & = & - \zeta  w_{n} & \pm & jw_{n}\sqrt{1-\zeta ^2} \\
-& = & -4.6  & \pm & j6.2761
+& = & -4.6  & \pm & j5.7216
 \end{array}
 \end{equation}
 
-Graficando el lugar de las raices (Ver Fig \ref{fig:rootLocus} ), en ella se observa el polo deseado, asi como el polo de la planta y el cero del controlador PI cuyos parametros estan hallados aplicando el criterio de fase para el caso del cero y el criterio de la magnitud para la ganancia.
+Graficando el lugar de las raíces (Ver Fig. \ref{fig:root_locus}), en ella se observa el polo deseado, así como el polo de la planta y el cero del controlador PI cuyos parámetros están hallados aplicando el criterio de fase para el caso del cero y el criterio de la magnitud para la ganancia.
 
 \begin{figure}[h!]
 	\centering 
 	\graphicspath{./imagenes/}
- 	\includegraphics[width=0.45\textwidth]{./imagenes/rootLocus.png}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/root_locus.png}
  	\caption{Lugar de las raices}
- 	\label{fig:rootLocus}
+ 	\label{fig:root_locus}
 \end{figure}
 
-Note que $r_{3}$ corresponde al cero del integrador que más adelante será calculado. 
-Hallando los angulos $\theta _{1}$ y $ \theta _{2}$ con los cuales podrémos calcular $\theta _{3}$:
-
-\begin{eqnarray}
- \theta_{1}= \pi  -atan \big( \frac{Id}{rd} \big) =  2.2033 rad \\
- \theta_{2}= atan \big( \frac{Id-Ip}{rp-rd} \big) =  1.0046 rad \\
- \theta_{3}= \theta_{1}+ \theta_{2}+  \pi = 0.0663 rad
-\end{eqnarray}
-
-Usaremos el caso 2 para el cálculo del cero del controlador ($a$) debido a que el valor de $\theta_{3}<\frac{\Pi}{2}$
-
-\begin{equation}
-a =  r_{d} + \frac{i_{d}}{\tan(\theta _{3})}
-%rd+id/tan(theta3)
-\end{equation}
-
-Segun los parametros de la Fig \ref{fig:rootLocus} podemos hallar las siguientes magnitudes:
-
-\begin{equation}
-\begin{array}{ccc}
-r_{1} & = & s_{d} - s{c} \\
-& = &  -4.6000 + j6.2761 
-\end{array}
-\end{equation}
-
-\begin{equation}
-\begin{array}{ccc}
-r_{2} & = & s_{d} - s{p} \\
-& = & 3.9895 + j6.2761 
-\end{array}
-\end{equation}
-
-\begin{equation}
-\begin{array}{ccc}
-r_{3} & = & s_{d} - z{c} \\
-& = &  -103.79 + j6.2761 
-\end{array}
-\end{equation}
 
 Para el cálculo de la ganancia K, hacemos uso de la ganancia unitaria en el lugar de las raíces:
 
 \begin{equation}
-K = \frac{\left| r1 \right|  \left| r2 \right|}{Gain  \left| r3 \right|} =  0.0642
-%K = abs(r1)abs(r2)/(gainabs(r3));
+K = \frac{\left| r1 \right|  \left| r2 \right|}{Gain  \left| r3 \right| \left| r4 \right|} =  0.00089201
+%K = abs(r1)abs(r2)/(gainabs(r3)(r4));
 \end{equation}
 
-Finalmente nuestro controlador PI queda de la siguiente forma:
- 
-\begin{equation}
-G_{c}(s) = \frac{0.06422s+6.37}{s}
-%  0.06422 s + 6.37
-%  ----------------
-%         s
-\end{equation}
-
-Usando re-diseño por el metodo de Tustin para hallar el controlador en tiempo discreto, obtenemos:
-
-\begin{equation}
-G_{c}(z) = \frac{0.1377 z + 0.009287}{z - 1}
-%  0.1377 z + 0.009287
-%  -------------------
-%         z - 1
-\end{equation}
-
- 
-\subsection{Resultados obtenidos}
-
-La data obtenida de la adquisición se puede apreciar en la figura ~\ref{fig:data}
+Obteniendo finalmente las ganancias de nuestro controlador $Kp=0.2804$ $Ki=8.0547$ $Kd=0.0009$, nuestro sistema responde de la siguiente forma(Ver Fig. \ref{fig:respuesta_sistema})
 \begin{figure}[h!]
 	\centering 
 	\graphicspath{./imagenes/}
- 	\includegraphics[width=0.45\textwidth]{./imagenes/data.png}
- 	\caption{Data obtenida de la adquisición}
- 	\label{fig:data}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/respuesta_sistema.png}
+ 	\caption{Respuesta del sistema}
+ 	\label{fig:respuesta_sistema}
 \end{figure}
 
-\begin{figure}[h!]
-	\centering 
-	\graphicspath{./imagenes/}
- 	\includegraphics[width=0.45\textwidth]{./imagenes/identificacion_arx.png}
- 	\caption{Identificación ARX}
- 	\label{fig:identificacion_arx}
-\end{figure}
+  
 
- 
-Se identifica el sistema usando la estructura paramétrica ARX (ver Fig. ~\ref{fig:identificacion_arx}) usando una frecuencia de muestreo $f_{s}$ de $=30Hz$. Posteriormente, hallamos los controladores PI y exportamos los coeficientes obtenidos del controlador digital al directorio \textit{/data} para su procesamiento en labview. El código generado es el siguiente:
-
-
+El código \ref{code:pid} escrito en matlab realiza el proceso de calculo de las ganancias de nuestro controlador PID por el método de ubicación de polo.
 \begin{lstlisting}
+
+\label{code:pid}
 clear all; close all; clc
-%% Programa para calcular el controlador
-% -----------------
-%% Cargando la DATA
-% -----------------
-dataLeida = load('../data/data_rc.lvm');
-T=1/30; % Tiempo de Muestreo 
-y1=dataLeida(:,4);
-u1=dataLeida(:,6);
-
-figure
-subplot(211)
-plot(y1,'b','LineWidth',2); 
-xlabel('\bf t(seg)'); ylabel('\bf y(volts)');
-subplot(212)
-plot(u1,'r','LineWidth',2); 
-xlabel('\bf t(seg)'); ylabel('\bf u(volts)');
-
-% -------------------
-%% Identificación ARX
-% -------------------
+% -------------------------------------------------------------------------
+% Cargando la DATA
+% -------------------------------------------------------------------------
+data_load = load('../data/motor_gate.lvm');
+T = 1/30; % Tiempo de Muestreo 
+y1=data_load(:,4);
+u1=data_load(:,2);
+% -------------------------------------------------------------------------
+% Identificación ARX
+% -------------------------------------------------------------------------
 data=iddata(y1,u1,T);
 th=arx(data,[1 1 1]);
 present(th)
 thc=d2c(th);
 [num,den]=tfdata(thc);
-Gp=tf(num,den)
-gain = num{1}(2);
-tau = 1/num{1}(2);
-
-% -------------------
-%% Polos de la planta 
-% -------------------
-sp=pole(Gp);
-ip=abs(imag(sp));
-rp=abs(real(sp));
-
-% ------------------------------------------
-%% Especificaciones de diseño polos deseados
-% ------------------------------------------
-ts=1;
-Mp=0.1;
+Gp=tf(num,den);
+[Pp,Zp]=pzmap(Gp);         
+% ------------------------------------------------------------------------
+% Especificaciones de Diseño
+% ------------------------------------------------------------------------
+ts=1;       % Tiempo de Establecimiento 
+% ts=0.5;
+Mp=0.08;     % Máximo Sobrepaso
+% ------------------------------------------------------------------------
+% Polos deseados
+% ------------------------------------------------------------------------
 zeta=-log(Mp)/sqrt((log(Mp))^2+pi^2);
 wn=4.6/(zeta*ts);
 s1=-zeta*wn+1j*wn*sqrt(1-zeta^2);
-% Polo deseado
 sd=s1;
-id=abs(imag(sd));
-rd=abs(real(sd));
+pdi=imag(sd); 
+pdr=real(sd);
 
-% -------------------------------
-%% Diseño del control PI continuo
-% -------------------------------
-theta1=pi-atan(id/rd); 
-theta2=atan((id-ip)/(rp-rd)); 
-theta3=theta1+theta2+pi;   % condición de fase
-theta3 = pi_to_pi(theta3); 
+% ------------------------------------------------------------------------
+% Ploteo de polos y ceros Planta + Controlador
+% ------------------------------------------------------------------------
+plot(real(Pp),imag(Pp),'xb','MarkerSize',14,'LineWidth',2); % polos planta
+hold on;
+plot(real(Zp),imag(Zp),'ob','MarkerSize',14,'LineWidth',2); % ceros planta
+plot(pdr,pdi,'xg','MarkerSize',14,'LineWidth',2); % polos deseados
 
-if abs(theta3)<pi/2
-    zc = rd+id/tan(theta3);
-else
-    zc = rd-id/tan(theta3);
-end
-a = zc; % zero del controlador
-% polo del controlador
-sc = 0;
+plot([-300 1],[0 0],'k') % ejex
+plot([0 0],[-2 8],'k') % ejey
+% ------------------------------------------------------------------------
+% Angulos hacia los polos deseados
+% ------------------------------------------------------------------------
+theta1=(pi-atan(abs(pdi/pdr)))*180/pi;     % polo del PID (s=0)
+theta2=atan(abs(pdi)/abs(Pp-pdr))*180/pi;  % polo de la planta
+% ------------------------------------------------------------------------
+% Fase positiva que deben aportar los ceros del PID
+theta_c=-180+(theta1+theta2);
+% ------------------------------------------------------------------------
+% Calculo de a y b (Condicion de Fase)
+theta_a=0.1*theta_c;
+a=pdr-pdi/tan((180-theta_a)*pi/180);
+theta_b=theta_c; 
+b=pdr-pdi/tan((180-theta_b)*pi/180);
+plot(a,0,'or','MarkerSize',14,'LineWidth',2) % ceros PID (s=-a)
+plot(b,0,'or','MarkerSize',14,'LineWidth',2) % ceros PID (s=-b)
+plot(0,0,'xr','MarkerSize',14,'LineWidth',2); % polos PID
 
-r1 = sd-sc; %polo
-r2 = sd-sp; %polo
-r3 = sd-zc; %zero
+title('Polos y Ceros de la Planta y Controlador');
+axis([-300 20 -0.5 6.5])
+ylabel('Im'), xlabel('Re');
 
-K = abs(r1)*abs(r2)/(gain*abs(r3));
 
-% ---------------------------------------
-%% Simulación del Controlador PI continuo
-% ---------------------------------------
-Gc=tf(K*[1 a],[1 0])
-% Funcion de transferencia en lazo cerrado H 
+% ------------------------------------------------------------------------
+% Calculo de la Ganancia K (Condicion de Magnitud)
+% ------------------------------------------------------------------------
+Gc=tf(conv([1 abs(a)],[1 abs(b)]),[1 0]);
+FLA=series(Gc,Gp);
+K=rlocfind(FLA,sd); 
+% Ganancias Kp, Ki, Kd del controlador continuo
+Kp=K*abs(a+b); 
+Ki=K*abs(a*b); 
+Kd=K;       
+KPID=[Kp Ki Kd];
+
+% ------------------------------------------------------------------------
+% PID No Interactivo GPID(s)=Kp*(1+1/(Ti*s)+Td*s)
+% ------------------------------------------------------------------------
+Ti=Kp/Ki; 
+Td=Kd/Kp; 
+Gc=K*Gc;
 L=series(Gc,Gp);
-H=L/(L+1)
-
-figure; hold on;
-t = 0:0.001:5;
-
+H=L/(L+1);
+% Ploteos
+figure
+t=0:0.001:2;
 u=ones(size(t));
-yp=lsim(H,u,t);
+yp = lsim(H,u,t);
+yla = lsim(Gp,u,t);
+plot(t,u,'b','LineWidth',2)
+hold
+plot(t,yp,'r','LineWidth',2)
+plot(t,yla,'g','LineWidth',2)
+axis([0 2 0 1.2])
+xlabel('\bf t(seg)')
+ylabel('\bf y(volts)');
+title('Respuesta del Sistema');
+legend('set point', 'respuesta en lazo cerrado', 'respuesta en lazo abierto')
+grid
 
-plot(t,u,'r')
-plot(t,yp, 'b', 'LineWidth',2)
-
-xlabel('\bf t(seg)'); ylabel('\bf y(volts)');
-legend('set point', 'y_{lazo cerrado}');
-
-% ---------------------------------
-%% Re-diseño por tustin del Control 
-%% en Tiempo Discreto
-% ---------------------------------
+% -------------------------------------------------------------------------
+% Re-diseño por tustin del Control en Tiempo Discreto
+% -------------------------------------------------------------------------
+[num,den]=tfdata(Gp);
+tau=(1/den{1}(2));
 T=tau/5;
 [Nt,Dt] = tfdata(Gc,'v');
 Nt = poly2sym(Nt,'s');
@@ -365,62 +671,76 @@ Gdt = vpa(Gdt,4);
 [NDt, DDt] = numden(Gdt);
 NDt = sym2poly(NDt);
 DDt = sym2poly(DDt);
-
-% --------------------------------
-%% FT del Controlador digital D(z)
-% --------------------------------
-GDt = tf(NDt,DDt,T)
-
-% -------------------------------------
-%% Coeficientes para lectura de LabVIEW
-% -------------------------------------
+% -------------------------------------------------------------------------
+% FT del Controlador digital D(z)
+% -------------------------------------------------------------------------
+GDt = tf(NDt,DDt,T);
+printsys(NDt,DDt,'z')
 [Np,Dp]=tfdata(Gp,'v');
-planta = [Np Dp]; 
-save '../data/coef_planta.lvm' planta -ascii -tabs
-save '../data/num_controller.lvm' NDt -ascii -tabs
-save '../data/den_controller.lvm' DDt -ascii -tabs
+datos=[Np Dp NDt DDt];
+
+disp('Kp Ki Kd:');
+disp(KPID);
 \end{lstlisting}
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+\subsection{Validación y comparación con un modelo teórico en tiempo real}
 
-
-Finalmente podemos validar que las respuestas de los sistemas controlados por un controlador PI (ver Fig. ~\ref{fig:pi_sistema_controlado}) y PID (ver Fig. ~\ref{fig:pid_sistema_controlado}) en lazo cerrado cumplen con las condiciones de diseño propuestas.
-
-
-
+Finalmente podemos validar mediante el esquema mostrado en la figura ~\ref{fig:labview_pid} que las respuesta del sistemas controlados por un controlador PID (ver Fig. ~\ref{fig:panel_labview}) en lazo cerrado cumplen con las condiciones de diseño propuestas.
 
 
 \begin{figure}[h!]
 	\centering 
 	\graphicspath{./imagenes/}
- 	\includegraphics[width=0.45\textwidth]{./imagenes/pi_sistema_controlado.png}
- 	\caption{Planta controlada usando un controlador PI}
- 	\label{fig:pi_sistema_controlado}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/labview_pid.png}
+ 	\caption{Esquema de un Controlador PID digital en labview}
+ 	\label{fig:labview_pid}
 \end{figure}
 
 \begin{figure}[h!]
 	\centering 
 	\graphicspath{./imagenes/}
- 	\includegraphics[width=0.45\textwidth]{./imagenes/pid_sistema_controlado.png}
- 	\caption{Planta controlada usando un controlador PID}
- 	\label{fig:pid_sistema_controlado}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/panel_labview.png}
+ 	\caption{Panel labview mostrando respuesta simulada(backward) y experimental(planta real)}
+ 	\label{fig:panel_labview}
 \end{figure}
+                 
+
+Podemos del mismo modo visualizar la respuesta del controlador PID con la misma data (ver Fig. ~\ref{fig:accion_control_pid}).
+
+\begin{figure}[h!]
+	\centering 
+	\graphicspath{./imagenes/}
+ 	\includegraphics[width=0.45\textwidth]{./imagenes/accion_control_pid.png}
+ 	\caption{Acción del controlador}
+ 	\label{fig:accion_control_pid}
+\end{figure}
+
+
+
 
 
 \section{CONCLUSIONES} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{itemize}
-\item Notamos que comparando ambos controladores empleados (PI y PID), el sistema responde mejor frente al controlador PI ya que posee un menor sobre impulso ante el PID. (ver Fig. ~\ref{fig:compara_pi_pid})
+\item Es importante quitar el offset (hacer que nuestra señal comience en cero) mediante software, para poder realizar la identificación.
 
+\item Basta con modelar a nuestro sistema como uno de primer orden, disminuyendo la complejidad de diseño de las ganancias de nuestro controlador.
+
+\item Es necesario configurar la frecuencia de PWM a una frecuencia mayor de 15kHz (nuestro PWM esta a 20KHz). De este modo se evita un chillido de parte del motor.
+
+\item Nuestro sistema responde de forma muy eficiente y rápida, a pesar de emplear un motor con desgaste mecánico. 
+
+\item Todo parte del escalamiento, si este esta mal realizado, nuestro sistema en lazo cerrado responderá de acuerdo a las ecuaciones derivadas de este.
 
 \end{itemize}
 
 
-\begin{figure}[h!]
-	\centering 
-	\graphicspath{./imagenes/}
- 	\includegraphics[width=0.45\textwidth]{./imagenes/compara_pi_pid.png}
- 	\caption{Comparación entre PI y PID}
- 	\label{fig:compara_pi_pid}
-\end{figure}
 
 
 \bibliographystyle{IEEE} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -432,7 +752,7 @@ Finalmente podemos validar que las respuestas de los sistemas controlados por un
 
 \bibitem{}
 Repositorios 
-\newblock {\em https://github.com/oskargicast/ControladorPI}
+\newblock {\em https://github.com/oskargicast/Control-Velocidad-Motor-DC}
 \newblock 
 
 \bibitem{}

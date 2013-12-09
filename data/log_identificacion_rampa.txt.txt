@@ -1,0 +1,168 @@
+signal(gate/step/rampa/seno): rampa
+
+ans =
+
+rampa
+
+# de muestras
+   300
+
+
+
+					 ARX(2, 1, 1)
+===========================================================
+D =
+ 
+          0.1711
+  ----------------------
+  z^2 - 1.068 z + 0.2928
+ 
+Sample time: 0.03 seconds
+Discrete-time transfer function.
+
+
+th =
+Discrete-time ARX model:  A(z)y(t) = B(z)u(t) + e(t)
+  A(z) = 1 - 1.068 z^-1 + 0.2928 z^-2               
+                                                    
+  B(z) = 0.1711 z^-1                                
+                                                    
+Sample time: 0.03 seconds
+  
+Parameterization:
+   Polynomial orders:   na=2   nb=1   nk=1
+   Number of free coefficients: 3
+   Use "polydata", "getpvec", "getcov" for parameters and their uncertainties.
+
+Status:                                          
+Estimated using ARX on time domain data "idata". 
+Fit to estimation data: 96.49% (prediction focus)
+FPE: 0.001963, MSE: 0.001931                     
+
+Gs =
+ 
+    -6.366 s + 341.3
+  ---------------------
+  s^2 + 40.94 s + 449.3
+ 
+Continuous-time transfer function.
+
+
+
+					 ARX(1, 2, 2)
+===========================================================
+D =
+ 
+  0.2449 z - 0.1021
+  -----------------
+     z - 0.8107
+ 
+Sample time: 0.03 seconds
+Discrete-time transfer function.
+
+
+th =
+Discrete-time ARX model:  A(z)y(t) = B(z)u(t) + e(t)
+  A(z) = 1 - 0.8107 z^-1                            
+                                                    
+  B(z) = 0.2449 z^-2 - 0.1021 z^-3                  
+                                                    
+Sample time: 0.03 seconds
+  
+Parameterization:
+   Polynomial orders:   na=1   nb=2   nk=2
+   Number of free coefficients: 3
+   Use "polydata", "getpvec", "getcov" for parameters and their uncertainties.
+
+Status:                                          
+Estimated using ARX on time domain data "idata". 
+Fit to estimation data: 93.19% (prediction focus)
+FPE: 0.007368, MSE: 0.007248                     
+
+Gs =
+ 
+  0.2449 s + 5.276
+  ----------------
+     s + 6.997
+ 
+Continuous-time transfer function.
+
+
+
+					 ARX(2, 2, 1)
+===========================================================
+D =
+ 
+     0.261 z - 0.2486
+  ----------------------
+  z^2 - 1.646 z + 0.6627
+ 
+Sample time: 0.03 seconds
+Discrete-time transfer function.
+
+
+th =
+Discrete-time ARX model:  A(z)y(t) = B(z)u(t) + e(t)
+  A(z) = 1 - 1.646 z^-1 + 0.6627 z^-2               
+                                                    
+  B(z) = 0.261 z^-1 - 0.2486 z^-2                   
+                                                    
+Sample time: 0.03 seconds
+  
+Parameterization:
+   Polynomial orders:   na=2   nb=2   nk=1
+   Number of free coefficients: 4
+   Use "polydata", "getpvec", "getcov" for parameters and their uncertainties.
+
+Status:                                          
+Estimated using ARX on time domain data "idata". 
+Fit to estimation data: 98.75% (prediction focus)
+FPE: 0.0002483, MSE: 0.0002426                   
+
+Gs =
+ 
+     10.38 s + 16.82
+  ---------------------
+  s^2 + 13.71 s + 22.34
+ 
+Continuous-time transfer function.
+
+
+
+					 ARX(1, 1, 1)
+===========================================================
+D =
+ 
+   0.2131
+  ---------
+  z - 0.721
+ 
+Sample time: 0.03 seconds
+Discrete-time transfer function.
+
+
+th =
+Discrete-time ARX model:  A(z)y(t) = B(z)u(t) + e(t)
+  A(z) = 1 - 0.721 z^-1                             
+                                                    
+  B(z) = 0.2131 z^-1                                
+                                                    
+Sample time: 0.03 seconds
+  
+Parameterization:
+   Polynomial orders:   na=1   nb=1   nk=1
+   Number of free coefficients: 2
+   Use "polydata", "getpvec", "getcov" for parameters and their uncertainties.
+
+Status:                                          
+Estimated using ARX on time domain data "idata". 
+Fit to estimation data: 95.92% (prediction focus)
+FPE: 0.002632, MSE: 0.002606                     
+
+Gs =
+ 
+    8.33
+  --------
+  s + 10.9
+ 
+Continuous-time transfer function.

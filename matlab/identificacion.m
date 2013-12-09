@@ -1,5 +1,5 @@
 clear all; close all; clc;
-line_widht = 1.5;
+line_widht = 2;
 
 %% Input
 data_type = input('signal(gate/step/rampa/seno): ', 's');
@@ -7,9 +7,7 @@ validatestring(data_type, {'gate', 'step', 'rampa', 'seno'})
 file = strcat('../data/motor_', data_type, '.lvm');
 data = load(file);
 
-%% Toolbox de identificacion mediante comandos Matlab
-%% DATA experimental proviene desde el circuito 3 Opams
-% OPAMS
+%% DATA experimental proviene desde la planta
 u = data(:, 2);
 y = data(:, 4);
 t_real = data(:, 1);
@@ -86,7 +84,3 @@ arrayfun(@num2str, nn(1,:), 'UniformOutput', true), ...
 arrayfun(@num2str, nn(2,:), 'UniformOutput', true), ...
 arrayfun(@num2str, nn(3,:), 'UniformOutput', true), ...
 arrayfun(@num2str, nn(4,:), 'UniformOutput', true));
-
-
-
-
